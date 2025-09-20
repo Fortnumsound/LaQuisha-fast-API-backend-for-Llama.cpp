@@ -3,7 +3,7 @@ LaQuisha AI backend
 ====================
 
 This module exposes a small FastAPI application that wraps a llama.cpp model.  It's
-designed to run a local LLaMA model (in this case the LLaMA‑3 7B model) using the
+designed to run a local LLaMA models (in this case the LLaMA‑3 7B model) using the
 `llama_cpp` python bindings.  The code is resilient to environments where the
 `llama_cpp` module is not available: in that case it will initialise a
 placeholder model that returns a friendly error message rather than failing to
