@@ -1,75 +1,6 @@
-<img width="512" height="512" alt="LaQuisha" src="https://github.com/user-attachments/assets/b9b3b833-8e47-47c7-b707-5c597b5baa36" />
-
-# LaQuisha AI 👑
-
-A booty-licious FastAPI backend designed to run GGUF models with Llama.cpp. LaQuisha brings that real talk with some AI magic ✨
-
-## 🚀 Quick Start
-
-### 1. Setup
-```bash
-# Clone the repository (if not already done)
-git clone https://github.com/Fortnumsound/LaQuisha-fast-API-backend-for-Llama.cpp.git
-cd LaQuisha-fast-API-backend-for-Llama.cpp
-
-# Run the setup script
-python setup.py
-```
-
-### 2. Start the Server
-```bash
-python laquisha_backend.py
-```
-
-### 3. Test the API
-```bash
-python test_laquisha.py
-```
-
-## 📚 API Endpoints
-
-- **GET /** - Welcome message and endpoint info
-- **GET /health** - Health check and status
-- **POST /v1/chat/completions** - Chat with LaQuisha (OpenAI-compatible)
-
-## 💬 Example Usage
-
-```bash
-curl -X POST "http://localhost:8000/v1/chat/completions" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "laquisha-7b",
-    "messages": [{"role": "user", "content": "Hello LaQuisha!"}],
-    "sass_level": 8
-  }'
-```
-
-## 🧠 Adding Real AI (Optional)
-
-For full AI functionality, install llama-cpp-python and add a GGUF model:
-
-```bash
-pip install llama-cpp-python
-# Download a GGUF model to ./models/ directory
-```
-
-LaQuisha works without a model (using witty fallback responses) but gets smarter with real AI!
-
-## 🔧 Configuration
-
-Set these environment variables to customize LaQuisha:
-
-- `MODEL_PATH` - Path to your GGUF model file
-- `UVICORN_HOST` - Server host (default: 0.0.0.0)
-- `UVICORN_PORT` - Server port (default: 8000)
-
----
-
-## 📖 Full Source Code
-
-Below is the complete source code for reference:
-
-```python
+"""
+LaQuisha, a booty-licious fast API backend designed to run GGUF models with Llama.cpp
+====================
 
 This module exposes a small FastAPI application that wraps a llama.cpp model.  It's
 designed to run a local LLaMA models (in this case the LLaMA‑3 7B model) using the
@@ -86,6 +17,7 @@ from pydantic import BaseModel
 from typing import List, Optional, Any
 import os
 import random
+import time
 
 try:
     # Attempt to import llama_cpp.  If this fails the server will still start
@@ -277,13 +209,12 @@ async def chat_completions(request: ChatRequest) -> ChatResponse:
                 "content": generated_text,
             },
             "finish_reason": "stop",
-        }<img width="512" height="512" alt="LaQuisha" src="https://github.com/user-attachments/assets/0f0d9568-a007-40bf-9d3f-fc97376451e0" />
-
+        }
 
         return ChatResponse(
             id=f"laquisha-{os.urandom(8).hex()}",
             object="chat.completion",
-            created=int(os.times().elapsed),
+            created=int(time.time()),
             model=request.model,
             choices=[choice],
             laquisha_flavor=get_laquisha_flavor() if sass_level >= 8 else None,
@@ -331,37 +262,3 @@ if __name__ == "__main__":
 
     print("🌟 Starting LaQuisha AI... Hold onto your edges! 🌟")
     uvicorn.run("laquisha_backend:app", host="0.0.0.0", port=8000, reload=False)
-```
-
-## 🎯 Features
-
-- **OpenAI-compatible API** - Drop-in replacement for OpenAI chat completions
-- **Sass Level Control** - Adjust LaQuisha's attitude from 1-10 
-- **Graceful Fallbacks** - Works without llama-cpp-python installed
-- **Resilient Architecture** - Handles missing models gracefully
-- **Real Talk Responses** - LaQuisha keeps it 100% authentic
-
-## 🛠️ Development
-
-### File Structure
-```
-├── laquisha_backend.py   # Main FastAPI application
-├── test_laquisha.py      # Test suite
-├── setup.py             # Setup script
-├── requirements.txt     # Python dependencies
-├── models/              # Directory for GGUF model files
-└── README.md           # This file
-```
-
-### Testing
-Run the full test suite:
-```bash
-python test_laquisha.py
-```
-
-### Contributing
-LaQuisha welcomes contributions! Make sure your code has the right amount of sass and keeps it real.
-
----
-
-*"Baby, I'm 'bout to serve you some realness right now."* - LaQuisha AI 💅
