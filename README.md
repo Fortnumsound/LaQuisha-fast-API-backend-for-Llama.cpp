@@ -1,5 +1,8 @@
 <img width="512" height="512" alt="LaQuisha" src="https://github.com/user-attachments/assets/b9b3b833-8e47-47c7-b707-5c597b5baa36" />
-LaQuisha, a booty-licious fast API backend for running GGUF model wrapped Llama.cpp
+
+
+
+LaQuisha, a booty-licious fast API backend designed to run GGUF models with Llama.cpp
 ====================
 
 This module exposes a small FastAPI application that wraps a llama.cpp model.  It's
