@@ -1,4 +1,4 @@
-<img width="512" height="512" alt="LaQuisha" src="https://github.com/user-attachments/assets/b9b3b833-8e47-47c7-b707-5c597b5baa36" />
+<img width="512" height="512" alt="LaQuisha-logo" src="https://github.com/user-attachments/assets/8c097d13-16c3-4aa3-a411-42afef1f4414" />
 
 # LaQuisha AI 👑
 
