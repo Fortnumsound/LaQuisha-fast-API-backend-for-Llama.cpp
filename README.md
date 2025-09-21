@@ -2,7 +2,9 @@
 
 # LaQuisha AI 👑
 
-A booty-licious FastAPI twext browser and backend designed to run GGUF models with Llama.cpp. LaQuisha brings that real talk with some AI magic ✨
+Designed to run any quantized GGUF model using Llama.cpp
+
+A booty-licious FastAPI text browser and backend designed to run GGUF models with Llama.cpp. LaQuisha brings that real talk with some AI magic ✨
 
 ## 🚀 Quick Start
 
