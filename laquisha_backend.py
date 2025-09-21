@@ -1,6 +1,5 @@
 """
 LaQuisha, a booty-licious fast API backend designed to run GGUF models with Llama.cpp
-====================
 
 This module exposes a small FastAPI application that wraps a llama.cpp model.  It's
 designed to run a local LLaMA models (in this case the LLaMA‑3 7B model) using the
