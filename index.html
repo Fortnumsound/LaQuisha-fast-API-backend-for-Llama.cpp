@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat with LaQuisha</title>
+  <style>
+    /* General page styling */
+    body {
+      font-family: Arial, sans-serif;
+      background-image: url('/static/logo.png');
+      background-position: top left;
+      background-repeat: no-repeat;
+      background-size: contain;
+      background-attachment: fixed;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+    /* Container for chat and controls */
+    #chat-container {
+      background-color: rgba(255, 255, 255, 0.85);
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+      width: 90%;
+      max-width: 700px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+    #chat {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 10px;
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 4px;
+      background-color: #fafafa;
+    }
+    /* Input row styling */
+    .input-row {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+    }
+    .input-row input[type="text"] {
+      flex-grow: 1;
+      padding: 8px;
+      margin-right: 10px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    .input-row button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+    }
+    /* Settings row styling */
+    .settings-row {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .settings-row label {
+      margin-right: 4px;
+    }
+    /* File upload styling */
+    .upload-row {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #mic_button {
+      margin-left: 10px;
+      background-color: #f44336;
+    }
+
+    /* Chat message row styling */
+    .message-row {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    /* Avatar styling for LaQuisha's messages */
+    .message-row .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    .message-row p {
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="chat-container">
+    <h1>Chat with LaQuisha</h1>
+    <div class="settings-row">
+      <div>
+        <label for="user_name">Your Name:</label>
+        <input type="text" id="user_name" placeholder="Enter your name" />
+      </div>
+      <div>
+        <label for="temperature">Temperature:</label>
+        <input type="range" id="temperature" min="0" max="2" step="0.1" value="1" />
+        <span id="temp_value">1</span>
+      </div>
+      <div>
+        <label for="tokens">Max Tokens:</label>
+        <input type="number" id="tokens" value="150" min="1" />
+      </div>
+    </div>
+    <div class="upload-row">
+      <label for="model_file">Model file (.gguf):</label>
+      <input type="file" id="model_file" />
+      <button onclick="uploadModel()">Upload Model</button>
+    </div>
+    <div id="chat"></div>
+    <div class="input-row">
+      <input type="text" id="user_input" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
+      <button id="mic_button" onclick="toggleRecording()">🎤</button>
+    </div>
+  </div>
+  <script>
+    // Display the current temperature value
+    const tempSlider = document.getElementById('temperature');
+    const tempValueLabel = document.getElementById('temp_value');
+    tempValueLabel.textContent = tempSlider.value;
+    tempSlider.addEventListener('input', () => {
+      tempValueLabel.textContent = tempSlider.value;
+    });
+
+    // Handle sending messages to the backend
+    async function sendMessage() {
+      const userInputElem = document.getElementById('user_input');
+      const message = userInputElem.value.trim();
+      if (!message) return;
+      const userName = document.getElementById('user_name').value || 'User';
+      const temperature = parseFloat(tempSlider.value);
+      const maxTokens = parseInt(document.getElementById('tokens').value);
+
+      // Display the user's message in the chat window
+      appendMessage('You', message);
+      userInputElem.value = '';
+
+      try {
+        const response = await fetch('/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: [
+              { role: 'system', content: `You are LaQuisha. Address the user as ${userName}.` },
+              { role: 'user', content: message }
+            ],
+            temperature: temperature,
+            max_tokens: maxTokens
+          })
+        });
+        const data = await response.json();
+        const reply = data.choices && data.choices[0]?.message?.content;
+        appendMessage('LaQuisha', reply || 'Error: No response');
+      } catch (err) {
+        appendMessage('Error', 'Failed to fetch response: ' + err.message);
+      }
+    }
+
+    // Append a chat message to the chat history
+    function appendMessage(sender, content) {
+      const chatDiv = document.getElementById('chat');
+      // Create a container for the message row so we can attach an avatar
+      const row = document.createElement('div');
+      row.classList.add('message-row');
+      // If the message is from LaQuisha, include the avatar image.  The avatar
+      // should be placed in the static folder as ``avatar.png`` (or
+      // customised as needed).  For other senders no avatar is shown.
+      if (sender === 'LaQuisha') {
+        const avatarImg = document.createElement('img');
+        // Use the user's provided avatar file.  Place your image (e.g. ``laquisha_avatar.png``)
+        // in the ``static`` folder.  Adjust the filename here to match your
+        // actual file name.  The default below assumes a file named
+        // laquisha_avatar.png exists in the static directory.
+        avatarImg.src = '/static/laquisha_avatar.png';
+        avatarImg.alt = 'LaQuisha Avatar';
+        avatarImg.classList.add('avatar');
+        row.appendChild(avatarImg);
+      }
+      // Create the paragraph containing the sender name and content
+      const messageElem = document.createElement('p');
+      messageElem.innerHTML = `<strong>${sender}:</strong> ${content}`;
+      row.appendChild(messageElem);
+      chatDiv.appendChild(row);
+      chatDiv.scrollTop = chatDiv.scrollHeight;
+    }
+
+    // Speech recognition setup
+    let recognition;
+    let recording = false;
+    // A running transcript of all speech captured during the current recording
+    let finalTranscript = '';
+
+    function toggleRecording() {
+      // Check for browser support
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert('Speech recognition is not supported in this browser.');
+        return;
+      }
+      if (!recording) {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+        // Enable continuous listening so the microphone stays active until the user
+        // clicks the mic button again.  Without this the recognition will stop
+        // after a short pause.
+        recognition.continuous = true;
+        // Do not return interim results; set to true if you want live updates.
+        recognition.interimResults = false;
+        // Initialise finalTranscript with any existing text so speech can append
+        // to previously typed or dictated input.  Without this, restarting the
+        // microphone would overwrite the input field.
+        finalTranscript = document.getElementById('user_input').value || '';
+        recognition.onresult = (event) => {
+          // Append all new results since the last onresult event.  Use
+          // event.resultIndex so we only process new segments.  See the
+          // Web Speech API example for details on this pattern【846104414636721†L165-L181】.
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            finalTranscript += event.results[i][0].transcript;
+          }
+          document.getElementById('user_input').value = finalTranscript;
+        };
+        recognition.onend = () => {
+          // If recording is still active, restart the recognizer.  This allows
+          // continuous listening even if the browser stops the audio stream due
+          // to a pause in speech.  Without restarting, the recogniser stops
+          // listening after each pause.
+          if (recording) {
+            recognition.start();
+          } else {
+            document.getElementById('mic_button').textContent = '🎤';
+          }
+        };
+        recognition.start();
+        recording = true;
+        document.getElementById('mic_button').textContent = '🔴';
+      } else {
+        // When the user clicks the mic button again, stop recording and reset
+        // the button.  Do not clear the final transcript so the dictated text
+        // remains in the input field.
+        recognition.stop();
+        recording = false;
+        document.getElementById('mic_button').textContent = '🎤';
+      }
+    }
+
+    // Upload a new GGUF model to the backend
+    async function uploadModel() {
+      const fileInput = document.getElementById('model_file');
+      if (!fileInput.files.length) {
+        alert('Please select a .gguf model file to upload');
+        return;
+      }
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+      try {
+        const response = await fetch('/upload_model', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await response.json();
+        // Provide a more helpful notification including the model name.  Use
+        // the uploaded file's name if the backend doesn't return one.  This
+        // ensures users know when the model has been loaded successfully.
+        const fileName = fileInput.files[0].name;
+        const msg = data.message || `Model '${fileName}' uploaded.`;
+        alert(msg);
+      } catch (err) {
+        alert('Upload failed: ' + err.message);
+      }
+    }
+  </script>
+</body>
+</html>
